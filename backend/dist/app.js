@@ -10,14 +10,23 @@ const admin_routes_1 = __importDefault(require("./routes/admin.routes"));
 const citizen_routes_1 = __importDefault(require("./routes/citizen.routes"));
 const issue_routes_1 = __importDefault(require("./routes/issue.routes"));
 const app = (0, express_1.default)();
+const normalizeOrigin = (origin) => origin.replace(/\/$/, "");
 const allowedOrigins = [
-    process.env.CORS_ORIGIN,
     process.env.CLIENT_URL,
-].filter(Boolean);
+    process.env.CORS_ORIGIN,
+    "https://civic-eye-frontend-sepia.vercel.app",
+]
+    .filter(Boolean)
+    .map((origin) => normalizeOrigin(origin));
 app.use((0, cors_1.default)({
     origin(origin, callback) {
+        const normalizedOrigin = origin ? normalizeOrigin(origin) : "";
         const isLocalDevOrigin = !!origin && /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin);
-        if (!origin || allowedOrigins.includes(origin) || isLocalDevOrigin) {
+        const isVercelPreview = !!origin && /^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin);
+        if (!origin ||
+            allowedOrigins.includes(normalizedOrigin) ||
+            isLocalDevOrigin ||
+            isVercelPreview) {
             callback(null, true);
             return;
         }

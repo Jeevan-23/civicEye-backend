@@ -7,10 +7,10 @@ import issueRoutes from "./routes/issue.routes";
 
 const app = express();
 
+
 const allowedOrigins = [
-  process.env.CORS_ORIGIN,
-  process.env.CLIENT_URL,
-].filter(Boolean) as string[];
+  "https://civic-eye-frontend-sepia.vercel.app",
+];
 
 app.use(cors({
   origin(origin, callback) {

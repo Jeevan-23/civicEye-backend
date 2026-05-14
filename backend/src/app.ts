@@ -9,36 +9,15 @@ const app = express();
 
 const normalizeOrigin = (origin: string) => origin.replace(/\/$/, "");
 
-const allowedOrigins = [
-  process.env.CLIENT_URL,
-  process.env.CORS_ORIGIN,
-  "https://civic-eye-frontend-sepia.vercel.app",
-]
-  .filter(Boolean)
-  .map((origin) => normalizeOrigin(origin as string));
-
-app.use(cors({
-  origin(origin, callback) {
-    const normalizedOrigin = origin ? normalizeOrigin(origin) : "";
-    const isLocalDevOrigin =
-      !!origin && /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin);
-    const isVercelPreview =
-      !!origin && /^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin);
-
-    if (
-      !origin ||
-      allowedOrigins.includes(normalizedOrigin) ||
-      isLocalDevOrigin ||
-      isVercelPreview
-    ) {
-      callback(null, true);
-      return;
-    }
-
-    callback(new Error(`CORS blocked origin: ${origin}`));
-  },
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://civic-eyee.vercel.app",
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));

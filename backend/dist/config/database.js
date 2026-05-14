@@ -15,18 +15,34 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.connectDB = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 require("dotenv/config");
-const DATABASE_URL = process.env.DATABASE_URL || process.env.MONGODB_URL || "";
+const DATABASE_URL = process.env.DATABASE_URL ||
+    process.env.MONGODB_URI ||
+    process.env.MONGODB_URL ||
+    "";
+let connectionPromise = null;
 const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
     if (!DATABASE_URL) {
-        throw new Error("DATABASE_URL or MONGODB_URL is required");
+        throw new Error("DATABASE_URL, MONGODB_URI, or MONGODB_URL is required");
     }
-    try {
-        yield mongoose_1.default.connect(DATABASE_URL);
+    if (mongoose_1.default.connection.readyState === 1) {
+        return mongoose_1.default;
+    }
+    if (connectionPromise) {
+        return connectionPromise;
+    }
+    connectionPromise = mongoose_1.default
+        .connect(DATABASE_URL, {
+        serverSelectionTimeoutMS: 10000,
+    })
+        .then((connection) => {
         console.log("Connected to DB !");
-    }
-    catch (err) {
+        return connection;
+    })
+        .catch((err) => {
+        connectionPromise = null;
         console.error("DB connection error:", err);
         throw err;
-    }
+    });
+    return connectionPromise;
 });
 exports.connectDB = connectDB;

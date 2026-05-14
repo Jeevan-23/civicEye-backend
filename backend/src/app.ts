@@ -46,6 +46,7 @@ import cookieParser from "cookie-parser";
 import adminRoutes from "./routes/admin.routes";
 import citizenRoutes from "./routes/citizen.routes";
 import issueRoutes from "./routes/issue.routes";
+import { connectDB } from "./config/database";
 
 const app = express();
 
@@ -65,6 +66,16 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(cookieParser());
+
+app.use(async (_req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    console.error("MongoDB connection failed for request:", error);
+    res.status(503).json({ message: "Database connection failed" });
+  }
+});
 
 // Routes
 app.use("/api/v1", citizenRoutes);
